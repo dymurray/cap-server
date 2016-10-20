@@ -29,3 +29,51 @@ func TestNulecules(t *testing.T) {
 			strings.Trim(rr.Body.String(), "\n\t "), expected)
 	}
 }
+
+func TestIndexHandler(t *testing.T) {
+	req, err := http.NewRequest("GET", "/static/index.html", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	rr := httptest.NewRecorder()
+	handler := http.HandlerFunc(IndexHandler)
+
+	handler.ServeHTTP(rr, req)
+
+	if status := rr.Code; status != http.StatusOK {
+		t.Log(status)
+	}
+
+	expected := `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>cap_ui</title>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/latest/css/bootstrap.min.css">
+</head>
+<body>
+  <div id="main"></div>
+  <script src="/static/cap_ui.js"></script>
+</body>
+</html>`
+
+	actual := strings.TrimSpace(rr.Body.String())
+
+	if actual != expected {
+		t.Errorf("handler returned unexpected body: got [%v] want [%v]", actual, expected)
+	}
+}
+
+func TestWrapScriptCmd(t *testing.T) {
+	wrappedCmd := wrapScriptCmd("ls")
+	if wrappedCmd != "\"ls\"" {
+		t.Errorf("wrap returned %v expected %v", wrappedCmd, "\"ls\"")
+	}
+}
+
+func TestMainGoDir(t *testing.T) {
+	output := mainGoDir()
+	if "." != output {
+		t.Errorf("wrap returned %v expected %v", output, ".")
+	}
+}
